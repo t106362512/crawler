@@ -8,7 +8,8 @@
 - 已在 Azure kubernetes Service 上測試了,確定可用
 
 ### 說明
- - 將 .env-sample 改為 .env 並填入
+ - 將 .env-sample 改為 .env 並填入對應的參數即可簡單的build image並測試
+ - 已先build好一份image至docker hub了,` t106362512/crawler-multi:latest`
 
 ## 感謝名單
  - [Openbox7681](https://github.com/Openbox7681/CrawlerTurtorial) - 提供 source code
