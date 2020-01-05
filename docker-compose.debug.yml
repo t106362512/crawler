@@ -1,0 +1,11 @@
+version: '2.1'
+
+services:
+  crawler:
+    image: crawler
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - 3000:3000
