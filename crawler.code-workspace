@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.envFile": "${workspaceFolder}/.env",
+		"docker.defaultRegistryPath": "t106362512"
+	}
+}
