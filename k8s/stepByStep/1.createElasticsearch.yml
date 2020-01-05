@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: els
+---
+# apiVersion: v1
+# kind: "PersistentVolume"
+# metadata:
+#   name: "esdata"
+#   namespace: els
+# spec:
+#   capacity:
+#     storage: "30Gi"
+#   accessModes:
+#     - "ReadWriteOnce"
+#   persistentVolumeReclaimPolicy: Recycle
+#   hostPath:
+#     path: /root/esdata
+# ---
+apiVersion: elasticsearch.k8s.elastic.co/v1beta1
+kind: Elasticsearch
+metadata:
+  name: seelasticsearch
+  namespace: els
+spec:
+  version: 7.5.1
+  nodeSets:
+  - name: default
+    count: 1
+    config:
+      node.master: true
+      node.data: true
+      node.ingest: true
+      node.store.allow_mmap: false
+      xpack.security.authc.realms:
+        native:
+          native1: 
+            order: 1
+    volumeClaimTemplates:
+    - metadata:
+        name: esdata
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+  http:
+    service:
+      spec:
+        type: LoadBalancer
+    # tls:
+    #   selfSignedCertificate:
+    #     disabled: true
