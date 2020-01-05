@@ -11,7 +11,7 @@ sleep 500
 kubectl apply -f ./stepByStep/2.createKibana.yml
 kubectl apply -f ./stepByStep/3.runCustomContainer.yml
 kubectl apply -f ./stepByStep/4.runCustomContainer_multi.yml
-PASSWORD=$(kubectl get secret seelasticsearch-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 --decode)
+PASSWORD=$(kubectl get secret seelasticsearch-es-elastic-user --namespace els -o=jsonpath='{.data.elastic}' | base64 --decode)
 # https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-quickstart.html#k8s_request_elasticsearch_access
 
 kubectl get service #找到port為9200的外部ip
