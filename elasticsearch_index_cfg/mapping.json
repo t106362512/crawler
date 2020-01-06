@@ -1,54 +1,78 @@
-PUT _template/mymap
-{
+curl -XPUT "https://elastic-es-http.els.svc:9200/_template/mymap" -H 'Content-Type: application/json' -d'{
   "index_patterns": [
-    "ptt*"
+    "test*"
   ],
   "mappings": {
     "properties": {
       "author": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
       },
       "board": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
       },
       "title": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
       },
       "@timestamp": {
         "type": "date"
       },
       "article": {
-        "type": "text"
-      },
-      "ip": {
-        "type": "text"
-      },
-      "url": {
-        "type": "text"
-      },
-      "id": {
-        "type": "text"
-      },
-      "push": {
-        "type": "nested",
-        "properties": {
-          "push_tag": {
-            "type": "text"
-          },
-          "push_userid": {
-            "type": "text"
-          },
-          "push_content": {
-            "type": "text"
-          },
-          "push_ip": {
-            "type": "text"
-          },
-          "push_datetime": {
-            "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
           }
         }
+      },
+      "ip": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "url": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "id": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "push": {
+        "type": "nested"
       }
     }
   }
-}
+}'

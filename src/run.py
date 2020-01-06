@@ -270,7 +270,7 @@ def saveES(esindex, doc, docid=None):
             print("Es Connection Failed Try again")
 
 
-def main():
+def main(es_root_index='test'):
     # 從首頁進入並設定cookie
     ptt = "https://www.ptt.cc"
     board = "Gossiping"
@@ -312,7 +312,7 @@ def main():
                     #     news_info["datetime"], "%Y-%m-%d %H:%M:%S").strftime('%Y-%m-%d')
 
                     # 寫入elasticsearch
-                    saveES(esindex="ptt_{}".format(dd), doc=news_info)
+                    saveES(esindex="{}_{}".format(es_root_index, dd), doc=news_info)
 
                     # news_info = json.dumps(news_info)
                     # with open("news_info.json", "at", encoding="UTF-8") as fw:
@@ -341,6 +341,7 @@ def main():
 if __name__ == "__main__":
     try:
         print(os.getenv('ELASTICSEARCH_ENDPOINT'))
-        main()
+        ELASTICSEARCH_ROOT_INDEX = os.getenv('ELASTICSEARCH_ROOT_INDEX','test')
+        main(es_root_index=ELASTICSEARCH_ROOT_INDEX)
     except Exception as e:
         logging.error('[Exception]: {}'.format(repr(e)))
