@@ -280,17 +280,17 @@ def saveES(esindex, doc, docid=None):
                        scheme="https",
                        port=9200, verify_certs=False)
 
-    while True:
+    for i in range(1,4):
         try:
             requests.urllib3.disable_warnings()
             create_index = es.indices.create(index=esindex, ignore=400)
-            res = es.index(index=esindex, doc_type="ptt", id=docid, body=doc)
+            res = es.index(index=esindex, doc_type="_doc", id=docid, body=doc)
             # logging.info('[Elastic]: {}'.format(res))
             get_logger().info('[Elastic]: {}'.format(res))
             break
         except Exception as e:
             # logging.error('[Elastic]: {}'.format(repr(e)))
-            get_logger().error('[Elastic]: {}'.format(repr(e)))
+            get_logger().error('[Elastic]:Time:{}, {}'.format(str(i),repr(e)))
             time.sleep(5)
             print("Es Connection Failed Try again")
 

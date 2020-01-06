@@ -261,7 +261,7 @@ def saveES(esindex, doc, docid=None):
     while True:
         try:
             create_index = es.indices.create(index=esindex, ignore=400)
-            res = es.index(index=esindex, doc_type="ptt", id=docid, body=doc)
+            res = es.index(index=esindex, doc_type="_doc", id=docid, body=doc)
             logging.info('[Elastic]: {}'.format(res))
             break
         except Exception as e:

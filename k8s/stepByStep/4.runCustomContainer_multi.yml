@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: crawlermulti
+  name: crawlermulti15
   namespace: els
 spec:
   containers:
-  - name: crawlermulti
+  - name: crawlermulti15
     image: "t106362512/crawler-multi"
     imagePullPolicy: Always
     env:
@@ -14,17 +14,17 @@ spec:
     - name: PTT_BOARD
       value: "Gossiping"
     - name: PTT_START_PAGE_INDEX
-      value: "1"
+      value: "3250"
     - name: ELASTICSEARCH_ROOT_INDEX
       value: "multi_ptt"
     - name: ELASTICSEARCH_ENDPOINT
       # value: "20.43.169.93:9200"
-      value: "seelasticsearch-es-http.els:9200"
+      value: "elastic-es-http.els:9200"
     - name: ELASTICSEARCH_USER
       value: "elastic"
     - name: ELASTICSEARCH_PASSWD
       valueFrom:
           secretKeyRef:
-            name: seelasticsearch-es-elastic-user
+            name: elastic-es-elastic-user
             key: elastic
   restartPolicy: OnFailure

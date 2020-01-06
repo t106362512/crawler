@@ -15,13 +15,13 @@ spec:
       value: "ptt"
     - name: ELASTICSEARCH_ENDPOINT
       # value: "20.43.169.93:9200"
-      value: "seelasticsearch-es-http.els:9200"
+      value: "elastic-es-http.els:9200"
     - name: ELASTICSEARCH_USER
       # value: "t106362501"
       value: "elastic"
     - name: ELASTICSEARCH_PASSWD
       valueFrom:
           secretKeyRef:
-            name: seelasticsearch-es-elastic-user
+            name: elastic-es-elastic-user
             key: elastic
   restartPolicy: OnFailure

@@ -2,13 +2,24 @@
 apiVersion: kibana.k8s.elastic.co/v1beta1
 kind: Kibana
 metadata:
-  name: sekibana
+  name: kibana
   namespace: els
 spec:
+  podTemplate:
+    spec:
+      containers:
+      - name: kibana
+        resources:
+          requests:
+            memory: 1Gi
+            cpu: 0.5
+          limits:
+            memory: 2Gi
+            cpu: 1
   version: 7.5.1
   count: 1
   elasticsearchRef:
-    name: seelasticsearch
+    name: elastic
   http:
     service:
       spec:

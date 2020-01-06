@@ -1,0 +1,54 @@
+PUT _template/mymap
+{
+  "index_patterns": [
+    "ptt*"
+  ],
+  "mappings": {
+    "properties": {
+      "author": {
+        "type": "text"
+      },
+      "board": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "@timestamp": {
+        "type": "date"
+      },
+      "article": {
+        "type": "text"
+      },
+      "ip": {
+        "type": "text"
+      },
+      "url": {
+        "type": "text"
+      },
+      "id": {
+        "type": "text"
+      },
+      "push": {
+        "type": "nested",
+        "properties": {
+          "push_tag": {
+            "type": "text"
+          },
+          "push_userid": {
+            "type": "text"
+          },
+          "push_content": {
+            "type": "text"
+          },
+          "push_ip": {
+            "type": "text"
+          },
+          "push_datetime": {
+            "type": "text"
+          }
+        }
+      }
+    }
+  }
+}
