@@ -1,0 +1,39 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    name: nginx-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: crawlermulti
+    spec:
+      containers:
+        - name: crawlermulti1
+          image: t106362512/crawler-multi
+          imagePullPolicy: Always
+          env:
+            - name: LOGGING_LEVEL
+              value: "INFO"
+            - name: PTT_BOARD
+              value: "Gossiping"
+            - name: PTT_START_PAGE_INDEX
+              value: "3250"
+            - name: PTT_START_PAGE_INDEX
+              value: "3250"
+            - name: ELASTICSEARCH_ROOT_INDEX
+              value: "test"
+            - name: ELASTICSEARCH_ENDPOINT
+              value: "elastic-es-http.els:9200"
+            - name: ELASTICSEARCH_USER
+              value: "elastic"
+            - name: ELASTICSEARCH_PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: elastic-es-elastic-user
+                  key: elastic
+  restartPolicy: OnFailure
