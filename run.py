@@ -1,37 +1,14 @@
-import requests
-import re
-import time
-import datetime
-import json
-import os
-import sys
-import logging
-import multiprocessing
+import requests,re,time,datetime,json,os,logging
 from functools import wraps
 from bs4 import BeautifulSoup
 from lxml import etree
-from elasticsearch import Elasticsearch, helpers
-from joblib import Parallel, delayed
-# from tqdm import tqdm #LineBar
+from elasticsearch import Elasticsearch
 
-requests.urllib3.disable_warnings()  # disable cert warninng
+requests.urllib3.disable_warnings()
 
 logging.basicConfig(level=os.getenv('LOGGING_LEVEL', logging.INFO),
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M')
-
-def get_logger():
-    requests.urllib3.disable_warnings()
-    logger = logging.getLogger()
-    logger.setLevel(level=os.getenv('LOGGING_LEVEL', logging.INFO))
-    formatter = logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s '
-        '[in %(pathname)s:%(lineno)d]', datefmt='%Y-%m-%d %H:%M')
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    return logger
-
 
 def timing(f):
     @wraps(f)
@@ -43,7 +20,6 @@ def timing(f):
             f.__name__, str(args)[0:100], str(kwargs)[0:100], end-start))
         return result
     return wrapper
-
 
 def get_page_index(page):
     soup_btn = BeautifulSoup(page, features="html.parser")
@@ -60,30 +36,22 @@ def get_page_index(page):
 
 # 取得文章標題與連結
 # Return list
-
-
 @timing
 def get_links_from_index(page, board):
     # 發現文章位於 div 標籤的 r-ent class先往下解析一層
     soup = BeautifulSoup(page, features="html.parser")
     divs = soup.find_all('div', class_='r-ent')
-
     linkList = list()
     for div in divs:
-        # print(div)
-
         soup_rent = BeautifulSoup(str(div), features="html.parser")
-
         # 解析標題的div結構
         title = soup_rent.find_all('div', class_='title')
         news_title = title[0].text.strip()
 
         if '公告' in news_title or '協尋' in news_title:
             continue
-
         try:
-            # 取得標題文章內文之連結
-            news_link = title[0].find('a')['href'].strip()
+            news_link = title[0].find('a')['href'].strip()  # 取得標題文章內文之連結
         except:
             continue
 
@@ -97,73 +65,28 @@ def get_links_from_index(page, board):
             logging.debug("[GET_LINK_FROM_INDEX]: {}".format(
                 "Not find, or can't match regex only one"))
             news_id = None
-
         linkList.append([news_title, news_link, news_date, news_id])
 
     # 因為每一個 index.html中的文章，最新的那篇是在最底下，所以做個 reversed
     # 這樣最新的文章就會是在 linkList[0]
     linkList = list(reversed(linkList))
-
     return linkList
 
-# 對個文章原始碼進行處理
-
-
-def get_news_content(link, html):
-    soup = BeautifulSoup(html, features="html.parser")
-    meta = soup.find_all('span', class_="article-meta-value")
-    try:
-        author = meta[0].text
-        title = meta[2].text
-        time = meta[3].text
-    except:
-        return None
-    txt = soup.find('div', id="main-content")
-    f2 = soup.find_all('span', class_="f2")
-    cut_link = ""
-
-    for i in f2:
-        if link in i.text:
-            cut_link = i.text
-            break
-
-    txt_next = txt.text.split(meta[3].text)
-
-    txt_final = txt_next[1].split(cut_link)
-    cont = txt_final[0]
-
-    txt_next = txt.text.split(meta[3].text)
-    try:
-        news = {
-            'Title': title,
-            'URL': link,
-            'Author': author,
-            'Description': cont,
-        }
-        # print(news)
-        return news
-
-    except Exception as e:
-        logging.error('[GET_NEWS_CONTENT]: {}'.format(repr(e)))
-        return None
-
-# 取得文章內容
-
-
+# 取得文章內容，以 dict 回傳
 def get_news_info(page, board):
     soup = BeautifulSoup(page, features="html.parser")
 
     # 取得 作者 看板 標題 時間
     tag_mapping = {"作者": "author", "看板": "board",
-                   "標題": "title", "時間": "@timestamp", "R作者": "rauthor", "站內": "insite"}
+                   "標題": "title", "時間": "@timestamp"}
     span_tag = soup.find_all("span", class_="article-meta-tag")
     span_value = soup.find_all("span", class_="article-meta-value")
     page_info = {}
     for i in range(4):
+
         # 設定時間格式 其餘欄位正常寫入
         if tag_mapping[str(span_tag[i].text)] == "@timestamp":
-            date_time = datetime.datetime.strptime(
-                str(span_value[i].text), "%a %b %d %H:%M:%S %Y").isoformat()
+            date_time = datetime.datetime.strptime(str(span_value[i].text), "%a %b %d %H:%M:%S %Y").isoformat()
             page_info.setdefault(tag_mapping[str(span_tag[i].text)], date_time)
         else:
             page_info.setdefault(
@@ -262,8 +185,6 @@ def get_news_info(page, board):
 
 # docid 文章寫入ES指定的ID 也可不只定
 # doc 文章寫入的本體
-
-
 @timing
 def saveES(esindex, doc, docid=None):
     ELASTICSEARCH_ENDPOINT = os.getenv('ELASTICSEARCH_ENDPOINT')
@@ -274,92 +195,73 @@ def saveES(esindex, doc, docid=None):
                        scheme="https",
                        port=9200, verify_certs=False)
 
-    for i in range(1,4):
+    while True:
         try:
-            requests.urllib3.disable_warnings()
             create_index = es.indices.create(index=esindex, ignore=400)
             res = es.index(index=esindex, doc_type="_doc", id=docid, body=doc)
             logging.info('[Elastic]: {}'.format(res))
             break
         except Exception as e:
-            if i > 2:
-                logging.error('[Elastic]: index_{} {}'.format(esindex, repr(e)))
+            logging.error('[Elastic]: {}'.format(repr(e)))
             time.sleep(5)
             print("Es Connection Failed Try again")
 
-
-def get_once_page_result(page_index: int, board: str = "Gossiping", elasticsearch_root_index: str = "test"):
-
-    se = requests.Session()
-    se.post("https://www.ptt.cc/ask/over18",
-            data={'yes': 'yes'})  # 設定18歲cookie
-    ptt = "https://www.ptt.cc"
-    page_url = 'https://www.ptt.cc/bbs/{}/index{}.html'.format(
-        board, str(page_index))
-
-    page = se.get(page_url).text
-
-    try:
-        news_List = get_links_from_index(page, board)
-
-        # 此頁文章列表
-        for title, link, date, id in news_List:
-
-            news_page = se.get(ptt + link).text
-            try:
-                news_info = get_news_info(news_page, board)
-
-                # logging.debug("[GET_NEWS_INFO]: Final time => {}".format(
-                #     news_info["@timestamp"]))
-
-                dd = datetime.datetime.fromisoformat(
-                    news_info.get("@timestamp")).strftime('%Y-%m-%d')
-
-                # 寫入elasticsearch
-                saveES(esindex="{}_{}".format(elasticsearch_root_index, dd), doc=news_info)
-
-                # news_info = json.dumps(news_info)
-                # with open("news_info.json", "at", encoding="UTF-8") as fw:
-                #     print(news_info, file=fw)
-
-            except AttributeError as e:
-                logging.debug('[GET_NEWS_INFO] : {}'.format(repr(e)))
-                pass
-
-            except Exception as err:
-                logging.error('[GET_NEWS_INFO] : {}'.format(repr(err)))
-    except Exception as err:
-        logging.error('[GET_LINKS_FROM_INDEX]: {}'.format(repr(err)))
-    return news_List
-
-
-def main(elasticsearch_root_index: str = 'test', ptt_board: str = 'Gossiping', ptt_start_page_index: int = 0, ptt_end_page_index: int = 0):
+def main(es_root_index='test'):
     # 從首頁進入並設定cookie
-    requests.urllib3.disable_warnings()
+    ptt = "https://www.ptt.cc"
+    board = "Gossiping"
+    url = 'https://www.ptt.cc/bbs/'+board+'/index.html'
     s = requests.Session()
-    s.post("https://www.ptt.cc/ask/over18", data={'yes': 'yes'})  # 設定18歲cookie
-    latest_url = 'https://www.ptt.cc/bbs/{}/index.html'.format(ptt_board)
-    latest_page = s.get(latest_url).text  # 取得最新頁內容
-    st_page_index = ptt_start_page_index if ptt_start_page_index > 0 else 1
-    en_page_index = ptt_end_page_index if ptt_end_page_index > 0 else get_page_index(latest_page)
+    s.post(ptt + "/ask/over18", data={'yes': 'yes'})  # 設定18歲cookie
+    page = s.get(url).text  # 取得最新頁內容
+    page_index = get_page_index(page)  # 取得最新頁index
+    ROOT_INDEX = os.getenv('ROOT_INDEX', 'test')
+    # print("page_index=", page_index)
 
-    # num_cores = multiprocessing.cpu_count()
-    # results = Parallel(n_jobs=num_cores)(delayed(get_once_page_result)(elasticsearch_root_index=elasticsearch_root_index
-    #     , board=ptt_board, page_index=i) for i in range(st_page_index, en_page_index))
-    for i in range(st_page_index, en_page_index + 1):
-        get_once_page_result(elasticsearch_root_index=elasticsearch_root_index
-            , board=ptt_board, page_index=i)
+    page_index_count = 0
+    while True:
+        page_uel = 'https://www.ptt.cc/bbs/{}/index{}.html'.format(board, str(page_index-page_index_count))
+        # print(page_uel)
 
-    logging.info(f'[MAIN-COMPELTE]: index_{st_page_index} to index_{ptt_end_page_index} complete')
+        page = s.get(page_uel).text
+
+        try:
+            news_List = get_links_from_index(page, board)
+
+            # 此頁文章列表
+            for title, link, date, id in news_List:
+
+                news_page = s.get(ptt + link).text
+                try:
+                    news_info = get_news_info(news_page, board)
+                    logging.debug("[GET_NEWS_INFO]: Final time => {}".format(
+                        news_info["@timestamp"]))
+                    dd = datetime.datetime.fromisoformat(news_info.get("@timestamp")).strftime('%Y-%m-%d')
+                    
+                    saveES(esindex="{}_{}".format(es_root_index, dd), doc=news_info)    # 寫入elasticsearch
+                except Exception as err:
+                    logging.error('[GET_NEWS_INFO] : {}'.format(repr(err)))
+
+            else:
+                # 取到此版第1頁
+                if (page_index-page_index_count) == 1:
+                    break  # break while
+                else:
+                    page_index_count += 1
+                    continue  # continue while
+        except Exception as err:
+            logging.error('[GET_LINKS_FROM_INDEX]: {}'.format(repr(err)))
+            # 取到此版第1頁
+            if (page_index-page_index_count) == 1:
+                break  # break while
+            else:
+                page_index_count += 1
+                continue
 
 if __name__ == "__main__":
     try:
-        ELASTICSEARCH_ROOT_INDEX = os.getenv(
-            'ELASTICSEARCH_ROOT_INDEX', 'test')
-        PTT_BOARD = os.getenv('PTT_BOARD', 'Gossiping')
-        PTT_START_PAGE_INDEX = int(os.getenv('PTT_START_PAGE_INDEX', 0))
-        PTT_END_PAGE_INDEX = int(os.getenv('PTT_END_PAGE_INDEX', 0))
-        main(elasticsearch_root_index=ELASTICSEARCH_ROOT_INDEX, ptt_board=PTT_BOARD,
-             ptt_start_page_index=PTT_START_PAGE_INDEX, ptt_end_page_index=PTT_END_PAGE_INDEX)
+        print(os.getenv('ELASTICSEARCH_ENDPOINT'))
+        ELASTICSEARCH_ROOT_INDEX = os.getenv('ELASTICSEARCH_ROOT_INDEX','test')
+        main(es_root_index=ELASTICSEARCH_ROOT_INDEX)
     except Exception as e:
         logging.error('[Exception]: {}'.format(repr(e)))

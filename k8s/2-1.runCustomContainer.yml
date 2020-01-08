@@ -1,0 +1,123 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: crawler
+  namespace: els
+spec:
+  containers:
+    - name: crawler-1-200
+      image: "t106362512/crawler"
+      imagePullPolicy: Always
+      env:
+        - name: LOGGING_LEVEL
+          value: "ERROR"
+        - name: PTT_BOARD
+          value: "Gossiping"
+        - name: PTT_START_PAGE_INDEX
+          value: "1"
+        - name: PTT_END_PAGE_INDEX
+          value: "200"
+        - name: ELASTICSEARCH_ROOT_INDEX
+          value: "ptt"
+        - name: ELASTICSEARCH_ENDPOINT
+          value: "elastic-es-http.els:9200"
+        - name: ELASTICSEARCH_USER
+          value: "elastic"
+        - name: ELASTICSEARCH_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: elastic-es-elastic-user
+              key: elastic
+    - name: crawler-201-400
+      image: "t106362512/crawler"
+      imagePullPolicy: Always
+      env:
+        - name: LOGGING_LEVEL
+          value: "ERROR"
+        - name: PTT_BOARD
+          value: "Gossiping"
+        - name: PTT_START_PAGE_INDEX
+          value: "201"
+        - name: PTT_END_PAGE_INDEX
+          value: "400"
+        - name: ELASTICSEARCH_ROOT_INDEX
+          value: "ptt"
+        - name: ELASTICSEARCH_ENDPOINT
+          value: "elastic-es-http.els:9200"
+        - name: ELASTICSEARCH_USER
+          value: "elastic"
+        - name: ELASTICSEARCH_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: elastic-es-elastic-user
+              key: elastic
+    - name: crawler-401-600
+      image: "t106362512/crawler"
+      imagePullPolicy: Always
+      env:
+        - name: LOGGING_LEVEL
+          value: "ERROR"
+        - name: PTT_BOARD
+          value: "Gossiping"
+        - name: PTT_START_PAGE_INDEX
+          value: "401"
+        - name: PTT_END_PAGE_INDEX
+          value: "600"
+        - name: ELASTICSEARCH_ROOT_INDEX
+          value: "ptt"
+        - name: ELASTICSEARCH_ENDPOINT
+          value: "elastic-es-http.els:9200"
+        - name: ELASTICSEARCH_USER
+          value: "elastic"
+        - name: ELASTICSEARCH_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: elastic-es-elastic-user
+              key: elastic
+    - name: crawler-601-800
+      image: "t106362512/crawler"
+      imagePullPolicy: Always
+      env:
+        - name: LOGGING_LEVEL
+          value: "ERROR"
+        - name: PTT_BOARD
+          value: "Gossiping"
+        - name: PTT_START_PAGE_INDEX
+          value: "601"
+        - name: PTT_END_PAGE_INDEX
+          value: "800"
+        - name: ELASTICSEARCH_ROOT_INDEX
+          value: "ptt"
+        - name: ELASTICSEARCH_ENDPOINT
+          value: "elastic-es-http.els:9200"
+        - name: ELASTICSEARCH_USER
+          value: "elastic"
+        - name: ELASTICSEARCH_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: elastic-es-elastic-user
+              key: elastic
+    - name: crawler-801-1000
+      image: "t106362512/crawler"
+      imagePullPolicy: Always
+      env:
+        - name: LOGGING_LEVEL
+          value: "ERROR"
+        - name: PTT_BOARD
+          value: "Gossiping"
+        - name: PTT_START_PAGE_INDEX
+          value: "801"
+        - name: PTT_END_PAGE_INDEX
+          value: "1000"
+        - name: ELASTICSEARCH_ROOT_INDEX
+          value: "ptt"
+        - name: ELASTICSEARCH_ENDPOINT
+          value: "elastic-es-http.els:9200"
+        - name: ELASTICSEARCH_USER
+          value: "elastic"
+        - name: ELASTICSEARCH_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: elastic-es-elastic-user
+              key: elastic
+  restartPolicy: OnFailure

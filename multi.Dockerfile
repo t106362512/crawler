@@ -1,6 +1,6 @@
 FROM python:3.7-alpine
 
-LABEL Name=crawler Version=0.0.1
+LABEL Name=crawler-multi Version=0.0.1
 
 WORKDIR /app
 ADD . /app
@@ -11,4 +11,4 @@ RUN apk add --no-cache --virtual .build-deps gcc libc-dev libxslt-dev && \
     apk del .build-deps
 
 
-CMD ["python3", "-m", "src.run"]
+CMD ["python3", "-m", "src.run_multi"]

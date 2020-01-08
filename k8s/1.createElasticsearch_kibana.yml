@@ -16,7 +16,7 @@ spec:
         type: LoadBalancer
   nodeSets:
   - name: default
-    count: 1
+    count: 3
     podTemplate:
       spec:
         initContainers:

@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: crawlermulti15
+  name: crawlermulti
   namespace: els
 spec:
   containers:
-  - name: crawlermulti15
+  - name: crawlermulti
     image: "t106362512/crawler-multi"
     imagePullPolicy: Always
     env:
