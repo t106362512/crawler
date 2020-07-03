@@ -15,4 +15,4 @@
  
 ## 感謝名單
  - [Openbox7681](https://github.com/Openbox7681/CrawlerTurtorial) - 提供 source code
- - [t106362501-簡浩庭](https://github.com/HowardCHT) - 小弟我只看yaml,其他都Howard完成的
+ - [t106362501-簡浩庭](https://github.com/HowardCHT)
